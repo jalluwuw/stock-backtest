@@ -105,20 +105,23 @@ scheduler = BackgroundScheduler(timezone=WIB_TZ)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    tickers = get_all_tickers()
-    sync_state["total_tickers"] = len(tickers)
+    # Di Vercel (serverless), jangan jalankan loop scheduler background yang berat
+    if not os.environ.get("VERCEL"):
+        tickers = get_all_tickers()
+        sync_state["total_tickers"] = len(tickers)
 
-    logging.info(f"[Startup] Memulai sync untuk {len(tickers)} emiten...")
-    import threading
-    startup_thread = threading.Thread(target=run_sync, daemon=True)
-    startup_thread.start()
+        logging.info(f"[Startup] Memulai sync untuk {len(tickers)} emiten...")
+        import threading
+        startup_thread = threading.Thread(target=run_sync, daemon=True)
+        startup_thread.start()
 
-    scheduler.add_job(run_sync, "interval", minutes=SYNC_INTERVAL_MINUTES, id="ihsg_sync")
-    scheduler.start()
-    logging.info(f"[Scheduler] Berjalan — sync tiap {SYNC_INTERVAL_MINUTES} menit")
+        scheduler.add_job(run_sync, "interval", minutes=SYNC_INTERVAL_MINUTES, id="ihsg_sync")
+        scheduler.start()
+        logging.info(f"[Scheduler] Berjalan — sync tiap {SYNC_INTERVAL_MINUTES} menit")
     yield
-    scheduler.shutdown()
-    logging.info("[Shutdown] Scheduler dihentikan")
+    if not os.environ.get("VERCEL"):
+        scheduler.shutdown()
+        logging.info("[Shutdown] Scheduler dihentikan")
 
 # ─── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(title="IHSG Screener API", lifespan=lifespan)
