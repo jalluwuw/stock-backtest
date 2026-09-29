@@ -135,6 +135,19 @@ app.add_middleware(
 )
 
 # ─── Endpoints ─────────────────────────────────────────────────────────────────
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "service": "IHSG Screener & Multi-Market Backtest API",
+        "docs": "/docs",
+        "version": "1.0.0"
+    }
+
+@app.get("/api")
+def api_root():
+    return root()
+
 @app.get("/api/v1/status")
 def get_status():
     """Status sync data terakhir dan jumlah emiten."""
