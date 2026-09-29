@@ -149,6 +149,8 @@ def api_root():
     return root()
 
 @app.get("/api/v1/status")
+@app.get("/v1/status")
+@app.get("/status")
 def get_status():
     """Status sync data terakhir dan jumlah emiten."""
     now = datetime.now(WIB)
@@ -170,6 +172,7 @@ def get_status():
     }
 
 @app.get("/api/v1/market-status")
+@app.get("/v1/market-status")
 def get_market_status():
     """Cek apakah pasar IHSG sedang buka."""
     now = datetime.now(WIB)
@@ -225,7 +228,7 @@ def test_telegram(req: TelegramTestRequest):
 
 
 @app.get("/api/v1/screen")
-
+@app.get("/v1/screen")
 def run_screener(
     min_value:      float = 20_000_000_000,
     min_return:     float = 1.0,
@@ -418,6 +421,7 @@ def run_screener(
 
 # ─── Chart Data Endpoint ────────────────────────────────────────────────────────
 @app.get("/api/v1/chart/{ticker}")
+@app.get("/v1/chart/{ticker}")
 def get_chart_data(
     ticker:      str,
     ma1:         int   = 5,
@@ -684,6 +688,7 @@ def resolve_symbol(ticker_raw: str, market_type: str) -> str:
 
 
 @app.post("/api/v1/backtest")
+@app.post("/v1/backtest")
 def run_backtest(req: BacktestRequest):
     """
     Simulasi backtest strategi untuk satu ticker dari berbagai pasar (IDX, Crypto, Forex, Commodity, Index).
